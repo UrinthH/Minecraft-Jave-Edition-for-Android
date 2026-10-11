@@ -215,11 +215,25 @@ object ControlManager {
     ) = withContext(Dispatchers.IO) {
         val file = getNewRandomFile()
         try {
-            inputStream.use { stream ->
+            val layout = inputStream.use { stream ->
                 val jsonString = stream.readString()
-                val layout = loadLayoutFromString(jsonString)
-                layout.saveToFile(file)
+                loadLayoutFromString(jsonString)
             }
+            layout.saveToFile(file)
+
+            // Importing a layout should also make it the active layout.
+            // Otherwise the file exists in the manager, but the game keeps using
+            // the previously selected controls, making the import appear broken.
+            val data = ControlData(
+                file = file,
+                controlLayout = ObservableControlLayout(layout),
+                isSupport = true
+            )
+            _dataList.update { current ->
+                (current.filterNot { it.file == file } + data)
+                    .sortedBy { it.controlLayout.info.name.default }
+            }
+            selectControl(data)
             onFinished()
         } catch (e: SerializationException) {
             FileUtils.deleteQuietly(file)

@@ -31,7 +31,6 @@ import com.movtery.layer_controller.updateLayoutToNew
 import com.movtery.layer_controller.utils.layoutJson
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject

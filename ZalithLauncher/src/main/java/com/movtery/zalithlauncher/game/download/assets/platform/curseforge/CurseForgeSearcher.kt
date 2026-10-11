@@ -44,8 +44,10 @@ import kotlinx.serialization.Serializable
 import java.io.File
 
 class CurseForgeSearcher(
-    val api: String = CURSEFORGE_API,
-    source: String = "Official CurseForge"
+    // The official API requires an authorized API key. Use the project's public
+    // MCIM API mirror by default so searches do not fail with HTTP 403.
+    val api: String = MCIM_CURSEFORGE_API,
+    source: String = "CurseForge API mirror"
 ): AbstractPlatformSearcher(
     platform = Platform.CURSEFORGE,
     source = source

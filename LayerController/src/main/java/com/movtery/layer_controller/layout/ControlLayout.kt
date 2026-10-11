@@ -116,10 +116,30 @@ fun loadLayoutFromString(jsonString: String): ControlLayout {
     val parsedObject = layoutJson.decodeFromString<JsonObject>(jsonString)
     // Third-party layouts may omit editorVersion. Treat these as the earliest supported
     // layout format and let the existing migration code normalize them.
-    val jsonObject = if (parsedObject["editorVersion"] == null) {
+    val jsonObject = if (parsedObject["editorVersion"] == null || parsedObject["info"] == null) {
         buildJsonObject {
             parsedObject.forEach { (key, value) -> put(key, value) }
-            put("editorVersion", JsonPrimitive(1))
+            if (parsedObject["editorVersion"] == null) put("editorVersion", JsonPrimitive(1))
+            // Some third-party layouts omit metadata. Supply safe defaults so the
+            // importer can continue parsing the actual controls.
+            if (parsedObject["info"] == null) {
+                put("info", buildJsonObject {
+                    put("name", buildJsonObject {
+                        put("default", JsonPrimitive(""))
+                        put("matchQueue", kotlinx.serialization.json.JsonArray(emptyList()))
+                    })
+                    put("author", buildJsonObject {
+                        put("default", JsonPrimitive(""))
+                        put("matchQueue", kotlinx.serialization.json.JsonArray(emptyList()))
+                    })
+                    put("description", buildJsonObject {
+                        put("default", JsonPrimitive(""))
+                        put("matchQueue", kotlinx.serialization.json.JsonArray(emptyList()))
+                    })
+                    put("versionCode", JsonPrimitive(0))
+                    put("versionName", JsonPrimitive(""))
+                })
+            }
         }
     } else {
         parsedObject

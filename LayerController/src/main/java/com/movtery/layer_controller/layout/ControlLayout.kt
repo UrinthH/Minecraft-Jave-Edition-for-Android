@@ -33,6 +33,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
@@ -112,8 +114,18 @@ fun loadLayoutFromFile(file: File): ControlLayout {
 }
 
 fun loadLayoutFromString(jsonString: String): ControlLayout {
-    val jsonObject = layoutJson.decodeFromString<JsonObject>(jsonString)
-    if (jsonObject["editorVersion"] == null) throw SerializationException("The file does not contain the key \"editorVersion\".")
+    val parsedObject = layoutJson.decodeFromString<JsonObject>(jsonString)
+    // Third-party layouts may omit editorVersion. Treat these as the earliest supported
+    // layout format and let the existing migration code normalize them.
+    val jsonObject = if (parsedObject["editorVersion"] == null) {
+        buildJsonObject {
+            parsedObject.forEach { (key, value) -> put(key, value) }
+            put("editorVersion", JsonPrimitive(1))
+        }
+    } else {
+        parsedObject
+    }
+    val normalizedJson = jsonObject.toString()
     val version = jsonObject["editorVersion"]!!.jsonPrimitive.int
     if (version <= EDITOR_VERSION) {
         val legacyJoystickStyle = if (version < 12) {
@@ -127,7 +139,7 @@ fun loadLayoutFromString(jsonString: String): ControlLayout {
             }
         } else null
 
-        var layout = layoutJson.decodeFromString<ControlLayout>(jsonString)
+        var layout = layoutJson.decodeFromString<ControlLayout>(normalizedJson)
         if (version < EDITOR_VERSION) layout = updateLayoutToNew(layout)
 
         if (legacyJoystickStyle != null) {

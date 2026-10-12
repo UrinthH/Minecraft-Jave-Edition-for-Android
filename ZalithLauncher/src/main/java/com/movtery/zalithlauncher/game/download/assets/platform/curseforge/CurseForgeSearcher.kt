@@ -44,8 +44,8 @@ import kotlinx.serialization.Serializable
 import java.io.File
 
 class CurseForgeSearcher(
-    val api: String = CURSEFORGE_API,
-    source: String = "Official CurseForge"
+    val api: String = MCIM_CURSEFORGE_API,
+    source: String = "MCIM CurseForge mirror"
 ): AbstractPlatformSearcher(
     platform = Platform.CURSEFORGE,
     source = source

@@ -19,10 +19,10 @@ import com.movtery.layer_controller.event.ClickEvent
 import com.movtery.layer_controller.layout.ControlLayer
 import com.movtery.layer_controller.layout.ControlLayout
 import com.movtery.layer_controller.layout.EmptyLayoutInfo
-import com.movtery.layer_controller.utils.getAButtonUUID
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlinx.serialization.SerializationException
+import java.util.UUID
 
 /**
  * Best-effort importer for Zalith Launcher 1 / Pojav custom-control JSON.
@@ -55,7 +55,7 @@ internal object LegacyControlLayoutImporter {
             val height = old.optDouble("height", 50.0).toFloat().coerceIn(5f, 240f)
             NormalData(
                 text = createTranslatable(name),
-                uuid = getAButtonUUID(),
+                uuid = UUID.randomUUID().toString().replace("-", "").take(18),
                 position = ButtonPosition((x * 10000).toInt().coerceIn(0, 10000), (y * 10000).toInt().coerceIn(0, 10000)),
                 buttonSize = ButtonSize(
                     type = ButtonSize.Type.Dp,
@@ -92,7 +92,7 @@ internal object LegacyControlLayoutImporter {
             layers = listOf(
                 ControlLayer(
                     name = "Imported",
-                    uuid = getAButtonUUID(),
+                    uuid = UUID.randomUUID().toString().replace("-", "").take(18),
                     hide = false,
                     visibilityType = VisibilityType.ALWAYS,
                     normalButtons = normalButtons

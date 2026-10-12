@@ -217,7 +217,7 @@ object ControlManager {
         try {
             inputStream.use { stream ->
                 val jsonString = stream.readString()
-                val layout = loadLayoutFromString(jsonString)
+                val layout = if (LegacyControlLayoutImporter.isLegacy(jsonString)) {\n                    LegacyControlLayoutImporter.convert(jsonString)\n                } else {\n                    loadLayoutFromString(jsonString)\n                }
                 layout.saveToFile(file)
             }
             onFinished()
